@@ -10,9 +10,13 @@ import (
 	"github.com/elastic/go-elasticsearch/v7"
 )
 
-type City struct {
+type CitySource struct {
 	Name       string `json:"city"`
 	Population int    `json:"population"`
+}
+
+type City struct {
+	Source CitySource `json:"_source"`
 }
 
 var es *elasticsearch.Client
@@ -45,7 +49,7 @@ func insertOrUpdateCityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if city.Name == "" || city.Population == 0 {
+	if city.Source.Name == "" || city.Source.Population == 0 {
 		log.Println("City and population must be provided")
 		http.Error(w, `{"error": "City and population must be provided"}`, http.StatusBadRequest)
 		return
@@ -60,7 +64,7 @@ func insertOrUpdateCityHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"message": "%s added/updated successfully"}`, city.Name)
+	fmt.Fprintf(w, `{"message": "%s added/updated successfully"}`, city.Source.Name)
 }
 
 func getCityPopulationHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,15 +83,18 @@ func getCityPopulationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Print city details in the server logs
+	log.Printf("City: %s, Population: %d\n", city.Source.Name, city.Source.Population)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(city)
 }
 
 func indexCity(city City) error {
-	log.Println("Indexing city:", city.Name)
-	body := fmt.Sprintf(`{"city": "%s", "population": %d}`, strings.ReplaceAll(city.Name, `"`, `\"`), city.Population)
-	_, err := es.Index("cities", strings.NewReader(body))
+	log.Println("Indexing city:", city.Source.Name)
+	body := fmt.Sprintf(`{"city": "%s", "population": %d}`, strings.ReplaceAll(city.Source.Name, `"`, `\"`), city.Source.Population)
+	_, err := es.Index("cities", strings.NewReader(body), es.Index.WithDocumentID(city.Source.Name))
 	return err
 }
 
