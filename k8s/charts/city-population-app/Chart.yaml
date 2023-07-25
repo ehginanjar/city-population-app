@@ -1,0 +1,5 @@
+apiVersion: v2
+name: city-population-app
+version: 0.1.0
+appVersion: "1.0"
+description: A simple Golang application for maintaining city populations with Elasticsearch database.

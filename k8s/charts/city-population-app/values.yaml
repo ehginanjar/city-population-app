@@ -1,0 +1,17 @@
+fullnameOverride: "city-population-app"
+
+replicaCount: 1
+
+image:
+  repository: grahmansyah/misc
+  tag: city-population-app
+  pullPolicy: Always
+
+service:
+  name: city-population-app
+  type: NodePort
+  port: 8080
+
+elasticsearch:
+  host: elasticsearch
+  port: 9200
