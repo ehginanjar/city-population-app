@@ -50,7 +50,7 @@ docker build -t your-dockerhub-username/city-population-app:latest .
 
 d. **Deploy the application to Kubernetes using Helm** (make sure you have the Helm chart ready):
 ```
-helm install city-population-app ./city_population_chart
+helm install city-population-app ./k8s/charts/city-population-app
 ```
 
 e. **Check the status of the deployment**:
